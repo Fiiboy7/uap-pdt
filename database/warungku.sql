@@ -21,7 +21,7 @@ CREATE TABLE kategori (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabel Produk
+
 CREATE TABLE produk (
     id_produk INT AUTO_INCREMENT PRIMARY KEY,
     kode_produk VARCHAR(20) UNIQUE NOT NULL,
@@ -30,11 +30,12 @@ CREATE TABLE produk (
     harga_jual DECIMAL(10,2) NOT NULL,
     stok INT DEFAULT 0,
     stok_minimum INT DEFAULT 5,
-    foto_produk VARCHAR(255) NULL AFTER stok_minimum,
+    foto_produk VARCHAR(255) NULL,
     status ENUM('aktif', 'nonaktif') DEFAULT 'aktif',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id_kategori) REFERENCES kategori(id_kategori)
 );
+
 
 -- Tabel Transaksi (Header)
 CREATE TABLE transaksi (
