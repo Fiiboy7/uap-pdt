@@ -205,7 +205,7 @@ BEGIN
 END //
 DELIMITER ;
 ```
-###  2. `update_stok_after_sale_v2`
+###  2. `alert_stok_menipis_v2`
 
 Memberikan notifikasi otomatis jika stok menipis atau habis.
 
