@@ -11,15 +11,11 @@ Dengan fitur login berbasis peran (Admin & Kasir), dashboard real-time, serta an
 ### 🧠 Stored Procedure 
 Stored procedure dalam WarungKu digunakan untuk menyederhanakan dan mengotomatisasi proses-proses penting di database, terutama yang bersifat berulang dan kompleks. Dengan stored procedure, pemrosesan data menjadi lebih efisien, terstruktur, dan mudah dipanggil dari aplikasi.
 
-
-
-### 📂 Lokasi: `database/procedures.sql`
-
 Berikut adalah daftar Stored Procedure yang diimplementasikan:
 
 ---
 
-###  1. `tambah_produk()`
+1. `tambah_produk()`
 
 Menambahkan produk baru ke dalam tabel `produk`.
 
@@ -49,8 +45,7 @@ Penggunaan di PHP:
 $query = "CALL tambah_produk('$kode_produk', '$nama_produk', $id_kategori, $harga_jual, $stok, $stok_minimum, '$status', " . ($foto_produk ? "'$foto_produk'" : "NULL") . ")";
 ```
 
-
-###  2. `update_produk()`
+2. `update_produk()`
 
 Memperbarui data produk berdasarkan ID. Jika `foto_produk` tidak disediakan, maka kolom foto tidak diubah.
 
@@ -102,7 +97,7 @@ $query = "CALL update_produk($id_produk, '$kode_produk', '$nama_produk', $id_kat
 
 ```
 
-###  3. `laporan_penjualan_harian()`
+3. `laporan_penjualan_harian()`
 
 Menghasilkan laporan penjualan harian berdasarkan tanggal tertentu.
 
@@ -133,7 +128,7 @@ $query = "CALL laporan_penjualan_harian('2024-12-10')";
 
 ```
 
-###  4. `get_produk_by_kategori()`
+4. `get_produk_by_kategori()`
 
 Mengambil daftar produk berdasarkan kategori tertentu.
 
@@ -161,16 +156,11 @@ $query = "CALL get_produk_by_kategori($id_kategori)";
 
 Trigger dalam **WarungKu** digunakan untuk menjalankan aksi otomatis saat terjadi perubahan data tertentu, seperti transaksi penjualan atau update stok. Dengan trigger, sistem dapat menjaga konsistensi data, memberikan notifikasi otomatis, dan menghindari kelalaian manusia.
 
-
----
-
-### 📂 Lokasi: `database/triggers_update.sql`
-
 Berikut adalah daftar trigger yang telah diimplementasikan:
 
 ---
 
-###  1. `update_stok_after_sale_v2`
+1. `update_stok_after_sale`
 
 Mengurangi stok produk dan mencatat log setiap kali terjadi transaksi penjualan.
 
@@ -205,7 +195,7 @@ BEGIN
 END //
 DELIMITER ;
 ```
-###  2. `alert_stok_menipis_v2`
+2. `alert_stok_menipis`
 
 Memberikan notifikasi otomatis jika stok menipis atau habis.
 
@@ -235,7 +225,7 @@ BEGIN
 END //
 DELIMITER ;
 ```
-###  3. `update_total_item_v2`
+3. `update_total_item`
 
 Menghitung total item dalam satu transaksi setelah detail ditambahkan.
 
@@ -273,9 +263,6 @@ Dengan adanya trigger di lapisan database, integritas dan konsistensi data tetap
 
 Transaksi digunakan untuk menjamin integritas data saat proses pembelian dilakukan. Dengan menerapkan prinsip **ACID**, sistem WarungKu memastikan bahwa seluruh langkah transaksi bersifat atomik dan aman dari inkonsistensi.
 
-### 📂 Lokasi: `kasir/proses_transaksi.php`
----
-
 ###  Konsep Dasar
 
 ```php
@@ -310,46 +297,38 @@ mysqli_autocommit($conn, true); // Aktifkan kembali autocommit
 2. **Langkah-langkah dalam Transaksi:**
 
 ```sql
-// 1. Generate nomor transaksi menggunakan FUNCTION
+1. Generate nomor transaksi menggunakan FUNCTION
 $no_transaksi_query = "SELECT generate_no_transaksi() as no_transaksi";
 
-// 2. Validasi stok untuk semua item menggunakan FUNCTION
+2. Validasi stok untuk semua item menggunakan FUNCTION
 foreach ($input['items'] as $item) {
     $stok_check = "SELECT cek_stok_tersedia({$item['id']}, {$item['qty']}) as status";
     // Jika stok tidak cukup, throw Exception untuk ROLLBACK
 }
 
-// 3. Hitung pajak menggunakan FUNCTION
+3. Hitung pajak menggunakan FUNCTION
 $pajak_query = "SELECT hitung_pajak({$input['subtotal']}, $diskon_nominal) as pajak";
 
-// 4. Insert header transaksi
+4. Insert header transaksi
 $insert_transaksi = "INSERT INTO transaksi (...)";
 
-// 5. Insert detail transaksi (trigger otomatis update stok)
+5. Insert detail transaksi (trigger otomatis update stok)
 foreach ($input['items'] as $item) {
     $insert_detail = "INSERT INTO detail_transaksi (...)";
 }
 ```
 3. **Keuntungan Implementasi:**
-
-🔄 Rollback otomatis jika terjadi error
-
-🔒 Perlindungan stok dari pengurangan yang tidak valid
-
-🧩 Konsistensi data antara header & detail terjaga
-
-⚙️ Validasi menyeluruh dengan kombinasi stored function dan trigger
+* Rollback otomatis jika terjadi error
+* Perlindungan stok dari pengurangan yang tidak valid
+* Konsistensi data antara header & detail terjaga
+* MValidasi menyeluruh dengan kombinasi stored function dan trigger
 
 
 ## 🧠 FUNCTION 
 
 Beberapa function disiapkan di level database untuk memastikan proses perhitungan dan validasi berjalan konsisten, efisien, dan reusable di berbagai bagian sistem.
 
-### 📂 Lokasi: `database/functions.sql`
-
----
-
-###  1. `generate_no_transaksi()`
+1. `generate_no_transaksi()`
 
 ```sql
 CREATE FUNCTION generate_no_transaksi()
@@ -373,7 +352,7 @@ END
 - **Logic**: Ambil nomor urut terakhir hari ini, tambah 1
 - **Contoh Output**: TRX2412100001, TRX2412100002, dst.
 
-###  2. `hitung_pajak(subtotal, diskon)`
+2. `hitung_pajak(subtotal, diskon)`
 
 ```sql
 CREATE FUNCTION hitung_pajak(subtotal DECIMAL(10,2), diskon DECIMAL(10,2))
@@ -389,7 +368,7 @@ END
 - **Logic**: (Subtotal - Diskon) × 10%
 - **Penggunaan**: Dipanggil dalam transaksi untuk konsistensi perhitungan
 
-###  3. `cek_stok_tersedia(id_produk, jumlah)`
+3. `cek_stok_tersedia(id_produk, jumlah)`
 
 ```sql
 CREATE FUNCTION cek_stok_tersedia(p_id_produk INT, p_jumlah INT)
@@ -412,7 +391,7 @@ END
 - **Logic**: Bandingkan stok tersedia dengan jumlah yang diminta
 - **Return**: 'TERSEDIA' atau 'TIDAK_CUKUP'
 
-###  4. `format_rupiah(nominal)`
+4. `format_rupiah(nominal)`
 
 ```sql
 CREATE FUNCTION format_rupiah(nominal DECIMAL(10,2))
