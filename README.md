@@ -428,6 +428,24 @@ END
 - **Logic**: Tambahkan prefix "Rp " dan format dengan pemisah ribuan
 - **Contoh**: 15000 → "Rp 15,000"
 
+## 🔄 Backup Otomatis
+
+Untuk menjaga ketersediaan dan keamanan data, sistem dilengkapi fitur backup otomatis menggunakan mysqldump dan Task Scheduler. Backup dilakukan secara berkala dan disimpan dengan nama file yang mencakup timestamp, sehingga mudah ditelusuri dan dikelola. Semua file backup akan tersimpan di direktori storage/backups.
+
+`backup.php`
+
+```sql
+<?php
+require_once __DIR__ . '/init.php';
+
+$date = date('Y-m-d_H-i-s');
+$backupFile = __DIR__ . "/storage/backups/pdtbank_backup_$date.sql";
+
+$command = "\"C:\\laragon\\bin\\mysql\\mysql-8.0.30-winx64\\bin\\mysqldump.exe\" -u " . DB_USER . " -p" . DB_PASS . " " . DB_NAME . " > \"$backupFile\"";
+
+exec($command);
+```
+
 ## 🧩 Relevansi Proyek dengan Pemrosesan Data Terdistribusi
 
 Sistem ini dirancang dengan menerapkan prinsip-prinsip penting dalam pemrosesan data terdistribusi, yaitu:
